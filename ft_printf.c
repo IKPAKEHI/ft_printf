@@ -336,6 +336,12 @@ void type_p(va_list *list, t_flags **mody)
 
 }
 
+// int main()
+// {	
+// 	ft_printf("% d", 42);
+// 	return 0;
+// }
+
 void type_d(va_list *list, t_flags **mody)
 {
 	long long int a;
@@ -368,10 +374,12 @@ void type_d(va_list *list, t_flags **mody)
 	char *res;
 	num = ft_itoa_base(a, 10);
 
-	if ((*mody)->width_len > 0 && (*mody)->flags[1] == 0 && (*mody)->flags[2] == 1 && (*mody)->flags[4] == 1)
+	if ((*mody)->flags[1] == 0 && (*mody)->flags[2] == 1 && num[0] != '-')
 	{
 		ft_putchar(' ');
+		if ((*mody)->width_len > 0)
 		(*mody)->width_len--;
+		(*mody)->flags[2]= 0;
 	}
 	if (num[0] == '0' && num[1] == '\0' && (*mody)->spec_flag == 0)
 		num++;
@@ -448,6 +456,15 @@ void type_D(va_list *list, t_flags **mody)
 	int res_len;
 	char *res;
 	num = ft_itoa_base(a, 10);
+
+	if ((*mody)->flags[1] == 0 && (*mody)->flags[2] == 1 && num[0] != '-')
+	{
+		ft_putchar(' ');
+		if ((*mody)->width_len > 0)
+		(*mody)->width_len--;
+		(*mody)->flags[2]= 0;
+	}
+
 	if (num[0] == '0' && num[1] == '\0' && (*mody)->spec_flag == 0)
 		num++;
 	if (num[0] == '-')
@@ -493,6 +510,8 @@ void type_D(va_list *list, t_flags **mody)
 
 }
 
+
+
 void type_i(va_list *list, t_flags **mody)
 {
 	long long int a;
@@ -521,6 +540,15 @@ void type_i(va_list *list, t_flags **mody)
 	int res_len;
 	char *res;
 	num = ft_itoa_base(a, 10);
+
+	if ((*mody)->flags[1] == 0 && (*mody)->flags[2] == 1 && num[0] != '-')
+	{
+		ft_putchar(' ');
+		if ((*mody)->width_len > 0)
+		(*mody)->width_len--;
+		(*mody)->flags[2]= 0;
+	}
+
 	if (num[0] == '0' && num[1] == '\0' && (*mody)->spec_flag == 0)
 		num++;
 	if (num[0] == '-')
