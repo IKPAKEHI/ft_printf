@@ -259,10 +259,6 @@ void type_p(va_list *list, t_flags **mody)
 	int res_len;
 	char *res;
 
-	// if ((*mody)->width_star)
-	// 	(*mody)->width_len = va_arg(*list, int);
-	// if ((*mody)->precision_star)
-	// 	(*mody)->precision_len = va_arg(*list, int);
 	if ((*mody)->flags[1] == 1)
 		(*mody)->flags[1] = 0;
 
@@ -336,19 +332,9 @@ void type_p(va_list *list, t_flags **mody)
 
 }
 
-// int main()
-// {	
-// 	ft_printf("% d", 42);
-// 	return 0;
-// }
-
 void type_d(va_list *list, t_flags **mody)
 {
 	long long int a;
-	// if ((*mody)->width_star)
-	// 	(*mody)->width_len = va_arg(*list, int);
-	// if ((*mody)->precision_star)
-	// 	(*mody)->precision_len = va_arg(*list, int);
 
 	if ((*mody)->width_len < 0)
 	{
@@ -431,12 +417,6 @@ void type_d(va_list *list, t_flags **mody)
 void type_D(va_list *list, t_flags **mody)
 {
 	long long int a;
-
-		
-	// if ((*mody)->width_star)
-	// 	(*mody)->width_len = va_arg(*list, int);
-	// if ((*mody)->precision_star)
-	// 	(*mody)->precision_len = va_arg(*list, int);
 
 	if ((*mody)->type == 5)
 		a = (unsigned long int)va_arg(*list, unsigned long int);
@@ -695,12 +675,6 @@ void type_o(va_list *list, t_flags **mody)
 void type_O(va_list *list, t_flags **mody)
 {
 	unsigned long int a;
-
-		
-	// if ((*mody)->width_star)
-	// 	(*mody)->width_len = va_arg(*list, int);
-	// if ((*mody)->precision_star)
-	// 	(*mody)->precision_len = va_arg(*list, int);
 
 	if ((*mody)->type == 5)
 		a = va_arg(*list, unsigned long int);
@@ -1115,11 +1089,6 @@ void type_c(va_list *list, t_flags **mody)
 {
 	char c;
 	char filler = ' ';
-	
-	// if ((*mody)->width_star)
-	// 	(*mody)->width_len = va_arg(*list, int);
-	// if ((*mody)->precision_star)
-	// 	(*mody)->precision_len = va_arg(*list, int);
 
 	if ((*mody)->width_len < 0)
 	{
@@ -1153,29 +1122,33 @@ void type_c(va_list *list, t_flags **mody)
 	ft_putchar(c);
 }
 
+
+
 void type_C(va_list *list, t_flags **mody)
 {
-	wchar_t c;
 
-	*mody = *mody;
-	c = va_arg(*list, wchar_t);
-	// if ((*mody)->width_star)
-	// 	(*mody)->width_len = va_arg(*list, int);
-	// if ((*mody)->width_len > 0 && (*mody)->flags[0] == 1)
-	// {
-	// 	ft_putwchar(c);
-	// 	while (--(*mody)->width_len)
-	// 		ft_putwchar(' ');
-	// 	return ;
-	// }
-	// if ((*mody)->width_len > 0 & (*mody)->flags[0] != 1)
-	// {
-	// 	while (--(*mody)->width_len)
-	// 		ft_putwchar(' ');
-	// 	ft_putwchar(c);
-	// 	return ;
-	// }
-	ft_putwchar(c);
+	type_c(list, &(*mody));
+	// wchar_t c;
+
+	// *mody = *mody;
+	// c = va_arg(*list, wchar_t);
+	// // if ((*mody)->width_star)
+	// // 	(*mody)->width_len = va_arg(*list, int);
+	// // if ((*mody)->width_len > 0 && (*mody)->flags[0] == 1)
+	// // {
+	// // 	ft_putwchar(c);
+	// // 	while (--(*mody)->width_len)
+	// // 		ft_putwchar(' ');
+	// // 	return ;
+	// // }
+	// // if ((*mody)->width_len > 0 & (*mody)->flags[0] != 1)
+	// // {
+	// // 	while (--(*mody)->width_len)
+	// // 		ft_putwchar(' ');
+	// // 	ft_putwchar(c);
+	// // 	return ;
+	// // }
+	// ft_putwchar(c);
 }
 
 void type_error(char *tmp, t_flags **mody)
