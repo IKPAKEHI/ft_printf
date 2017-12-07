@@ -141,6 +141,7 @@ int			ft_printf(char *format, ...)
 
 	g_str = (char*)malloc(sizeof(char) * 32);
 	g_i = 0;
+	g_str[g_i] = 0;
 	while (*format)
 	{
 		i = 0;
@@ -170,7 +171,7 @@ int			ft_printf(char *format, ...)
 		}
 		if (g_i % 31 == 0)
 			ft_realoc_str(&g_str, 32);
-		g_str[g_i++] = *format++;
+			g_str[g_i++] = *format++;
 	}
 	g_str[g_i] = 0;
 	ft_putstr(g_str);
