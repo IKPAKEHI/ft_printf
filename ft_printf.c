@@ -1185,8 +1185,6 @@ void type_c(va_list *list, t_flags **mody)
 		ft_putchar(c);
 		return ;
 	}
-	printf("%d\n",c );
-	return;
 	ft_putchar(c);
 }
 
