@@ -1172,30 +1172,30 @@ void type_c(va_list *list, t_flags **mody)
 void type_C(va_list *list, t_flags **mody)
 {
 
-	//type_c(list, &(*mody));
+	type_c(list, &(*mody));
 
-	wchar_t c;
+	// wchar_t c;
 
-	*mody = *mody;
-	c = va_arg(*list, wchar_t);
-	// if ((*mody)->width_star)
-	// 	(*mody)->width_len = va_arg(*list, int);
-	// if ((*mody)->width_len > 0 && (*mody)->flags[0] == 1)
-	// {
-	// 	ft_putwchar(c);
-	// 	while (--(*mody)->width_len)
-	// 		ft_putwchar(' ');
-	// 	return ;
-	// }
-	// if ((*mody)->width_len > 0 & (*mody)->flags[0] != 1)
-	// {
-	// 	while (--(*mody)->width_len)
-	// 		ft_putwchar(' ');
-	// 	ft_putwchar(c);
-	// 	return ;
-	// }
-	ft_putwchar(c);
-	//free(*mody);
+	// *mody = *mody;
+	// c = va_arg(*list, wchar_t);
+	// // if ((*mody)->width_star)
+	// // 	(*mody)->width_len = va_arg(*list, int);
+	// // if ((*mody)->width_len > 0 && (*mody)->flags[0] == 1)
+	// // {
+	// // 	ft_putwchar(c);
+	// // 	while (--(*mody)->width_len)
+	// // 		ft_putwchar(' ');
+	// // 	return ;
+	// // }
+	// // if ((*mody)->width_len > 0 & (*mody)->flags[0] != 1)
+	// // {
+	// // 	while (--(*mody)->width_len)
+	// // 		ft_putwchar(' ');
+	// // 	ft_putwchar(c);
+	// // 	return ;
+	// // }
+	// ft_putwchar(c);
+	// //free(*mody);
 }
 
 void type_error(char *tmp, t_flags **mody)
@@ -1243,12 +1243,8 @@ void type_error(char *tmp, t_flags **mody)
 	if ((*mody)->flags[4] == 1)
 		ft_write_zeros(&res,(*mody)->width_len, (*mody)->flags[0], 0);
 	ft_write_num(&res, tmp, (*mody)->flags[0], (*mody)->flags[1]);
-
 	g_str = ft_strjoin(g_str, res);
-	//printf(">%s<\n", g_str);
-	//ft_putstr(g_str);
 	free(tmp);
-	//free(res);
 	ft_putgstr();
 
 	
@@ -1449,8 +1445,6 @@ void	write_precison(char **str, int i, int num_len, int alig)
 	int a; 
 	int j;
 
-	//printf("%d\n", i);
-
 	minus = 0;
 	if (i <= 0)
 			return ;
@@ -1523,8 +1517,6 @@ void	ft_write_spaces(char **str, int i, int alignment)
 {
 	int j;
 
-	
-
 	if (i <= 0)
 		return ;
 	if (alignment == 0)
@@ -1573,7 +1565,6 @@ void	ft_putstr(char const *str)
 	}
 }
 
-
 void	ft_putwchar(wchar_t c)
 {
 	// 	простые чарики, уровень первый, 7 заполненых битов (от 0 до 127)				
@@ -1620,12 +1611,6 @@ void	ft_putwstr(wchar_t const *str)
 		str++;
 	}
 }
-
-// int main(int argc, char const *argv[])
-// {
-// 	ft_printf("%jx", -4294967296);
-// 	return 0;
-// }
 
 char	*remove_zeros(char **str, int neg)
 {
@@ -1804,11 +1789,6 @@ wchar_t 	*ft_duplic_wchr(wchar_t *str)
 				//READ FORMATING//
 //////////////////////////////////////////////////////////////////////////////////////
 
-// int main()
-// {
-// 	printf(">%010-+.3 5 .2d<\n", 14);
-// 	return 0;
-// }
 void	check_flags(char c, t_flags **formatt)
 {
 	if (c == '-')
@@ -1956,7 +1936,6 @@ t_flags		*ft_format(char **str, va_list *list)
 			tmp++;
 		while (*tmp && *tmp != '%')
 			ft_putchar(*tmp++);
-		//return (0);
 	}
 	return (formatt);
 }
