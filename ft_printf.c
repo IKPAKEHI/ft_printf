@@ -141,9 +141,6 @@ int			ft_printf(char *format, ...)
 
 	g_str = (char*)malloc(sizeof(char) * 32);
 	g_i = 0;
-	while(g_i < 32)
-		g_str[g_i++] = 0;
-	g_i = 0;
 	while (*format)
 	{
 		i = 0;
@@ -314,8 +311,7 @@ void type_S(va_list *list, t_flags **mody)
 		free(tmp);
 		return ;
 	}
-	if (g_str[0] != 0)
-		ft_putgstr();
+	ft_putgstr();
 	if ((*mody)->flags[4] == 1 && (*mody)->flags[0] != 1)
 		filler = '0';
 	if ((*mody)->precision_len == 0 && (*mody)->spec_flag == 0)
@@ -1186,29 +1182,29 @@ void type_c(va_list *list, t_flags **mody)
 void type_C(va_list *list, t_flags **mody)
 {
 
-	//type_c(list, &(*mody));
+	type_c(list, &(*mody));
 
-	wchar_t c;
+	// wchar_t c;
 
-	*mody = *mody;
-	c = va_arg(*list, wchar_t);
-	// if ((*mody)->width_star)
-	// 	(*mody)->width_len = va_arg(*list, int);
-	// if ((*mody)->width_len > 0 && (*mody)->flags[0] == 1)
-	// {
-	// 	ft_putwchar(c);
-	// 	while (--(*mody)->width_len)
-	// 		ft_putwchar(' ');
-	// 	return ;
-	// }
-	// if ((*mody)->width_len > 0 & (*mody)->flags[0] != 1)
-	// {
-	// 	while (--(*mody)->width_len)
-	// 		ft_putwchar(' ');
-	// 	ft_putwchar(c);
-	// 	return ;
-	// }
-	ft_putwchar(c);
+	// *mody = *mody;
+	// c = va_arg(*list, wchar_t);
+	// // if ((*mody)->width_star)
+	// // 	(*mody)->width_len = va_arg(*list, int);
+	// // if ((*mody)->width_len > 0 && (*mody)->flags[0] == 1)
+	// // {
+	// // 	ft_putwchar(c);
+	// // 	while (--(*mody)->width_len)
+	// // 		ft_putwchar(' ');
+	// // 	return ;
+	// // }
+	// // if ((*mody)->width_len > 0 & (*mody)->flags[0] != 1)
+	// // {
+	// // 	while (--(*mody)->width_len)
+	// // 		ft_putwchar(' ');
+	// // 	ft_putwchar(c);
+	// // 	return ;
+	// // }
+	// ft_putwchar(c);
 }
 
 void type_error(char *tmp, t_flags **mody)
