@@ -284,6 +284,12 @@ void 	check_err_S(wchar_t *str)
 	}
 }
 
+// int main(int argc, char const *argv[])
+// {
+// 	ft_printf("%S", L"asdasdas");
+// 	return 0;
+// }
+
 void type_S(va_list *list, t_flags **mody)
 {	
 	wchar_t *tmp;
@@ -301,7 +307,10 @@ void type_S(va_list *list, t_flags **mody)
 	}
 	check_err_S(tmp);
 	if (g_err == 1)
+	{
+		free(tmp);
 		return ;
+	}
 	ft_putgstr();
 	if ((*mody)->flags[4] == 1 && (*mody)->flags[0] != 1)
 		filler = '0';
@@ -1172,30 +1181,29 @@ void type_c(va_list *list, t_flags **mody)
 void type_C(va_list *list, t_flags **mody)
 {
 
-	type_c(list, &(*mody));
+	//type_c(list, &(*mody));
 
-	// wchar_t c;
+	wchar_t c;
 
-	// *mody = *mody;
-	// c = va_arg(*list, wchar_t);
-	// // if ((*mody)->width_star)
-	// // 	(*mody)->width_len = va_arg(*list, int);
-	// // if ((*mody)->width_len > 0 && (*mody)->flags[0] == 1)
-	// // {
-	// // 	ft_putwchar(c);
-	// // 	while (--(*mody)->width_len)
-	// // 		ft_putwchar(' ');
-	// // 	return ;
-	// // }
-	// // if ((*mody)->width_len > 0 & (*mody)->flags[0] != 1)
-	// // {
-	// // 	while (--(*mody)->width_len)
-	// // 		ft_putwchar(' ');
-	// // 	ft_putwchar(c);
-	// // 	return ;
-	// // }
-	// ft_putwchar(c);
-	// //free(*mody);
+	*mody = *mody;
+	c = va_arg(*list, wchar_t);
+	// if ((*mody)->width_star)
+	// 	(*mody)->width_len = va_arg(*list, int);
+	// if ((*mody)->width_len > 0 && (*mody)->flags[0] == 1)
+	// {
+	// 	ft_putwchar(c);
+	// 	while (--(*mody)->width_len)
+	// 		ft_putwchar(' ');
+	// 	return ;
+	// }
+	// if ((*mody)->width_len > 0 & (*mody)->flags[0] != 1)
+	// {
+	// 	while (--(*mody)->width_len)
+	// 		ft_putwchar(' ');
+	// 	ft_putwchar(c);
+	// 	return ;
+	// }
+	ft_putwchar(c);
 }
 
 void type_error(char *tmp, t_flags **mody)
