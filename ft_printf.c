@@ -325,7 +325,7 @@ void type_S(va_list *list, t_flags **mody)
 		while((*mody)->width_len--)
 			ft_putchar(filler);
 	i = 0;
-	while(tmp[i])
+	while(tmp[i] != 0)
 		ft_putwchar(tmp[i++]);
 	if ((*mody)->width_len > 0 && (*mody)->flags[0] == 1)
 		while((*mody)->width_len--)
@@ -1142,6 +1142,18 @@ void type_X(va_list *list, t_flags **mody)
 	free(res);
 }
 
+// int main(int argc, char const *argv[])
+// {
+// 	 ft_printf("%C", L'�');
+
+
+// 	 	ft_printf("%S", L"@@");
+
+	
+// 	//ft_printf("%S", L"aa");
+// 	return 0;
+// }
+
 void type_c(va_list *list, t_flags **mody)
 {
 	char c;
@@ -1157,14 +1169,12 @@ void type_c(va_list *list, t_flags **mody)
 		type_C(list, &(*mody));
 		return ;
 	}
-	c = va_arg(*list, int);
+	c = va_arg(*list, long long);
 	if ((*mody)->width_len > 0 && (*mody)->flags[0] == 1)
 	{
 		ft_putchar(c);
 		while (--(*mody)->width_len)
-		{
 			ft_putchar(filler);
-		}
 		return ;
 	}
 	if ((*mody)->width_len > 0 & (*mody)->flags[0] != 1)
@@ -1176,7 +1186,8 @@ void type_c(va_list *list, t_flags **mody)
 		ft_putchar(c);
 		return ;
 	}
-	ft_putchar(c);
+	if (c >= 0)
+		ft_putchar(c);
 }
 
 void type_C(va_list *list, t_flags **mody)
@@ -1565,12 +1576,13 @@ void	ft_putchar(char c)
 
 void	ft_putstr(char const *str)
 {
-	if (str == NULL)
-		return ;
-	while (*str != '\0')
+	int i;
+
+	i = 0;
+	while (str[i] != '\0')
 	{
-		ft_putchar(*str);
-		str++;
+		ft_putchar(str[i]);
+		i++;
 	}
 }
 
