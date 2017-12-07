@@ -1142,16 +1142,16 @@ void type_X(va_list *list, t_flags **mody)
 	free(res);
 }
 
-int main(int argc, char const *argv[])
-{
-	setlocale(LC_ALL, "en_US.UTF-8");
-	 ft_printf("%C", L'�');
-	// ft_printf("%S", L"@@");
+// int main(int argc, char const *argv[])
+// {
+// 	setlocale(LC_ALL, "en_US.UTF-8");
+// 	 ft_printf("%C", L'�');
+// 	// ft_printf("%S", L"@@");
 
 	
-	//ft_printf("%S", L"aa");
-	return 0;
-}
+// 	//ft_printf("%S", L"aa");
+// 	return 0;
+// }
 
 void type_c(va_list *list, t_flags **mody)
 {
