@@ -286,7 +286,7 @@ void 	check_err_S(wchar_t *str)
 
 // int main(int argc, char const *argv[])
 // {
-// 	ft_printf("%S", L"asdasdas");
+// 	ft_printf("%S", L"asdas##@#@#@()()()()(das");
 // 	return 0;
 // }
 
@@ -305,7 +305,7 @@ void type_S(va_list *list, t_flags **mody)
 		ft_putstr("(null)");
 		return ;
 	}
-	check_err_S(tmp);
+	//check_err_S(tmp);
 	if (g_err == 1)
 	{
 		free(tmp);
@@ -1786,7 +1786,6 @@ wchar_t 	*ft_duplic_wchr(wchar_t *str)
 		return (0);
 	i = 0;
 	res = (wchar_t*)malloc(sizeof(wchar_t) * ft_wstrlen(str) + sizeof(wchar_t));
-
 	while (*str)
 		res[i++] = *str++;
 	res[i] = 0;
