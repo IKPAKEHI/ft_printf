@@ -292,45 +292,6 @@ void 	check_err_S(wchar_t *str)
 
 void type_S(va_list *list, t_flags **mody)
 {	
-	// wchar_t *tmp;
-	// int i;
-	// int str_len;
-	// char filler;
-
-	// filler = ' ';
-	// tmp = ft_duplic_wchr(va_arg(*list, wchar_t*));
-	// if (tmp == 0)
-	// {
-	// 	ft_putgstr();
-	// 	ft_putstr("(null)");
-	// 	return ;
-	// }
-	// check_err_S(tmp);
-	// if (g_err == 1)
-	// {
-	// 	free(tmp);
-	// 	return ;
-	// }
-	// ft_putgstr();
-	// if ((*mody)->flags[4] == 1 && (*mody)->flags[0] != 1)
-	// 	filler = '0';
-	// if ((*mody)->precision_len == 0 && (*mody)->spec_flag == 0)
-	// 	tmp[0] = 0; 
-	// i = 0;
-	// if ((*mody)->precision_len > 0)
-	// 	while ((ft_wstrlen(tmp)) > (*mody)->precision_len)
-	// 		tmp[(ft_wcharlen(tmp) - 1)] = 0;
-	// (*mody)->width_len -= (ft_wstrlen(tmp));
-	// if ((*mody)->width_len > 0 && (*mody)->flags[0] != 1)
-	// 	while((*mody)->width_len--)
-	// 		ft_putchar(filler);
-	// i = 0;
-	// while(tmp[i])
-	// 	ft_putwchar(tmp[i++]);
-	// if ((*mody)->width_len > 0 && (*mody)->flags[0] == 1)
-	// 	while((*mody)->width_len--)
-	// 		ft_putchar(filler);	
-	// free(tmp);
 	wchar_t *tmp;
 	int i;
 	int str_len;
@@ -340,9 +301,17 @@ void type_S(va_list *list, t_flags **mody)
 	tmp = ft_duplic_wchr(va_arg(*list, wchar_t*));
 	if (tmp == 0)
 	{
+		ft_putgstr();
 		ft_putstr("(null)");
 		return ;
 	}
+	//check_err_S(tmp);
+	if (g_err == 1)
+	{
+		free(tmp);
+		return ;
+	}
+	//ft_putgstr();
 	if ((*mody)->flags[4] == 1 && (*mody)->flags[0] != 1)
 		filler = '0';
 	if ((*mody)->precision_len == 0 && (*mody)->spec_flag == 0)
@@ -355,11 +324,14 @@ void type_S(va_list *list, t_flags **mody)
 	if ((*mody)->width_len > 0 && (*mody)->flags[0] != 1)
 		while((*mody)->width_len--)
 			ft_putchar(filler);
-	while(*tmp)
-		ft_putwchar(*tmp++);
+	i = 0;
+	while(tmp[i])
+		ft_putwchar(tmp[i++]);
 	if ((*mody)->width_len > 0 && (*mody)->flags[0] == 1)
 		while((*mody)->width_len--)
 			ft_putchar(filler);	
+	free(tmp);
+
 }
 
 void ft_realochex(char **str, char c,char **to_free)
