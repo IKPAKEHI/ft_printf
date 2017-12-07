@@ -2,8 +2,6 @@
 //проверить строки с флагом 0
 //%lc должно вроде как работать как %C
 
-#define ABS(x) (x < 0) ? (x * -1) : x
-
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -13,6 +11,9 @@
 #include <locale.h>
 
 int g_ret;
+int g_err;
+char *g_str;
+int g_i;
 
 typedef struct	s_flags
 {
@@ -51,6 +52,7 @@ char		*ft_strsub(char const *s, unsigned int start, size_t len);
 wchar_t		*ft_duplic_wchr(wchar_t *str);
 int			ft_wstrlen(wchar_t *str);
 int			ft_wcharlen(wchar_t *str);
+char		*ft_strjoin(char *s1, char *s2);
 
 
 typedef void funcs(va_list *list, t_flags **mody);
@@ -70,18 +72,54 @@ void		type_X(va_list *list, t_flags **mody);
 void		type_c(va_list *list, t_flags **mody);
 void		type_C(va_list *list, t_flags **mody);
 void		type_interest(va_list *list, t_flags **mody);
+int			ft_printf(char *format, ...);
+
+static int		ft_realoc_str(char **str, int len)
+{
+	char	*tmp;
+	int		i;
+	int		j;
+
+	j = 0;
+	i = 0;
+	if ((*str) == 0 || str == 0)
+		return (0);
+	if (!(tmp = (char*)malloc(sizeof(char) * (ft_strlen(*str) + 1))))
+		return (0);
+	while ((*str)[j])
+		tmp[i++] = (*str)[j++];
+	tmp[i] = 0;
+	free((*str));
+	if (!(*str = (char*)malloc(sizeof(char) *
+		(ft_strlen(tmp) + len + 1))))
+		return (0);
+	i = 0;
+	j = 0;
+	while (tmp[j])
+		(*str)[i++] = tmp[j++];
+	(*str)[i] = 0;
+	free(tmp);
+	return (1);
+}
+
+void ft_putgstr(void)
+{
+	ft_putstr(g_str);
+	free(g_str);
+	g_str = (char*)malloc(sizeof(char) * 32);
+	g_i = 0;
+}
 
 int			ft_printf(char *format, ...)
 {
 	char *types = "sSpdDioOuUxXcC% ";
 	funcs* f[16];
 	va_list list;
-	va_list *tmp = &list;
-	int i = 0;
+	int i;
 	t_flags *mody;
 
-	g_ret = 0;
 
+	g_ret = 0;
 	f[0] = type_s;
 	f[1] = type_S;
 	f[2] = type_p;
@@ -101,9 +139,12 @@ int			ft_printf(char *format, ...)
 
 	va_start(list, format);
 
+	g_str = (char*)malloc(sizeof(char) * 32);
+	g_i = 0;
 	while (*format)
 	{
 		i = 0;
+		g_str[g_i] = 0;
 		if (*format == '%')
 		{
 			format++;
@@ -112,21 +153,28 @@ int			ft_printf(char *format, ...)
 			mody = ft_format(&format, &list);
 			if (*format == 0 || mody->error == 1)
 			{
-				mody->error = 0;
+				free(mody);
 				continue ;
 			}
+			if (*format != 'S')
+				ft_putgstr();
 			while (types[i])
 			{
 				if (types[i] == *format && types[i])
 					f[i](&list, &mody);
 				i++;	
 			}
+			free(mody);
 			format++;
 			continue;
 		}
-		ft_putchar(*format);
-		format++;
+		if (g_i % 31 == 0)
+			ft_realoc_str(&g_str, 32);
+		g_str[g_i++] = *format++;
 	}
+	g_str[g_i] = 0;
+	ft_putstr(g_str);
+	free(g_str);
 	va_end(list);
 	return (g_ret);
 }
@@ -156,6 +204,7 @@ void type_interest(va_list *list, t_flags **mody)
 	while (res_len)
 		res[--res_len] = filler;
 	ft_putstr(res);
+	free(res);
 }
 
 
@@ -170,9 +219,11 @@ void type_s(va_list *list, t_flags **mody)
 		return ;
 	}
 	tmp = ft_strdup(va_arg(*list, char*));
-
 	if ((*mody)->precision_len == 0 && (*mody)->spec_flag == 0)
+	{
+		free(tmp);
 		tmp = ft_strdup("");
+	}
 	if (tmp == 0)
 	{
 		ft_putstr("(null)");
@@ -180,10 +231,8 @@ void type_s(va_list *list, t_flags **mody)
 	}
 	if ((*mody)->precision_len > (int)ft_strlen(tmp))
 		(*mody)->precision_len = 0;
-
 	if ((*mody)->flags[1] == 1)
 		(*mody)->flags[1] = 0;
-
 	if ((*mody)->flags[0] == 1) //если есть флаг - то флаг 0 игнорируестя
 		(*mody)->flags[4] = 0;
 	if ((*mody)->flags[4] == 1 && ((*mody)->precision_star > 0 || (*mody)->precision_len > 0))
@@ -218,6 +267,21 @@ void type_s(va_list *list, t_flags **mody)
 
 	ft_write_num(&res, tmp, (*mody)->flags[0], (*mody)->flags[1]);
 	ft_putstr(res);
+	free(res);
+	free(tmp);
+}
+
+void 	check_err_S(wchar_t *str)
+{
+	int i;
+
+	i = 0;
+	while(str[i])
+	{
+		if(str[i] > 2097152)
+			g_err = 1;
+		i++;
+	}
 }
 
 void type_S(va_list *list, t_flags **mody)
@@ -231,9 +295,14 @@ void type_S(va_list *list, t_flags **mody)
 	tmp = ft_duplic_wchr(va_arg(*list, wchar_t*));
 	if (tmp == 0)
 	{
+		ft_putgstr();
 		ft_putstr("(null)");
 		return ;
 	}
+	check_err_S(tmp);
+	if (g_err == 1)
+		return ;
+	ft_putgstr();
 	if ((*mody)->flags[4] == 1 && (*mody)->flags[0] != 1)
 		filler = '0';
 	if ((*mody)->precision_len == 0 && (*mody)->spec_flag == 0)
@@ -246,50 +315,66 @@ void type_S(va_list *list, t_flags **mody)
 	if ((*mody)->width_len > 0 && (*mody)->flags[0] != 1)
 		while((*mody)->width_len--)
 			ft_putchar(filler);
-	while(*tmp)
-		ft_putwchar(*tmp++);
+	i = 0;
+	while(tmp[i])
+		ft_putwchar(tmp[i++]);
 	if ((*mody)->width_len > 0 && (*mody)->flags[0] == 1)
 		while((*mody)->width_len--)
 			ft_putchar(filler);	
+	free(tmp);
 }
+
+void ft_realochex(char **str, char c,char **to_free)
+{
+	char *tmp;
+	int i;
+	int j;
+
+	i = 0;
+	j = 0;
+	tmp = (char*)malloc(sizeof(char) * ft_strlen(*str));
+	while ((*str)[i])
+		tmp[j++] = (*str)[i++];
+	tmp[j] = 0;
+	free(*to_free);
+	(*str) = (char*)malloc(sizeof(char) * ft_strlen(tmp) + 4);
+	i = 2;
+	j = 0;
+	(*str)[0] = '0';
+	(*str)[1] = c;
+	while (tmp[j])
+		(*str)[i++] = tmp[j++];
+	(*str)[i] = 0;
+	free(tmp);
+}
+
 
 void type_p(va_list *list, t_flags **mody)
 {
 	char *num;
 	int res_len;
 	char *res;
+	char *to_free;
 
 	if ((*mody)->flags[1] == 1)
 		(*mody)->flags[1] = 0;
-
 	num = ft_itoa_base(va_arg(*list, long long int), 16);
+	to_free = num;
 	(*mody)->precision_len+=2;
-	// if (num[1] != '\0')
-	// while (*num == '0')
-	// 	num++;
-
-
 	if (num[0] == '0' && num[1] == '\0' && (*mody)->spec_flag == 0)
-	{
 		num++;
-	}
-		num -= 2;
-		num[0] = '0';
-		num[1] = 'x';
-	if (num[0] == '-') //если число негативное флаг space и + игнорируются
+	ft_realochex(&num, 'x', &to_free);
+	to_free = num;
+	if (num[0] == '-')
 	{
 		(*mody)->flags[1] = 0;
 		(*mody)->flags[2] = 0;
 	}
-	if ((*mody)->flags[0] == 1) //если есть флаг - то флаг 0 игнорируестя
+	if ((*mody)->flags[0] == 1)
 		(*mody)->flags[4] = 0;
-	//если есть флаг 0 и указана точность, 0 игнорируется
 	if ((*mody)->flags[4] == 1 && ((*mody)->precision_star > 0 || (*mody)->precision_len > 2))
 		(*mody)->flags[4] = 0;
-	// if ((*mody)->precision_len > (*mody)->width_len) //ширина имеет приоритет только если точность меньше
-	// 	(*mody)->width_len = 0;
 	res_len = (*mody)->precision_len <= (*mody)->width_len ? (*mody)->width_len : (*mody)->precision_len;
-
 	if ((num[0] == '-' || (*mody)->flags[1] == 1) && (*mody)->precision_len >= (int)ft_strlen(num))
 	{
 		if ((*mody)->width_len <= (*mody)->precision_len)
@@ -303,47 +388,41 @@ void type_p(va_list *list, t_flags **mody)
 		if ((*mody)->flags[1] == 1)
 			res_len++;
 	}
-	
 	res = (char*)malloc(sizeof(char) * (res_len + 1));
 	res[res_len] = 0;
 	res_len--;
-
 	while (res_len != -1)
 		res[res_len--] = ' ';
 	(*mody)->precision_len -= ft_strlen(num);
 	(*mody)->width_len -= ft_strlen(num);
 	if ((*mody)->precision_len > 0 && (*mody)->width_len > 0 && (*mody)->width_len > (*mody)->precision_len)
 		(*mody)->width_len -= (*mody)->precision_len;
-
-	//printf("%d\n",(*mody)->flags[4] );
 	if ((*mody)->flags[4] == 1)
 		ft_write_zeros(&res,(*mody)->width_len, (*mody)->flags[1], 1);
 	if ((*mody)->flags[4] == 0)
 		ft_write_spaces(&res,(*mody)->width_len, (*mody)->flags[0]);
-
 	ft_write_num(&res, num, (*mody)->flags[0], (*mody)->flags[1]);
-	
 	if ((*mody)->precision_len > 0)
 		write_precison(&res, (*mody)->precision_len, ft_strlen(num), (*mody)->flags[0]);
-
 	ft_make_0x_p(&res, 'x');
-
 	ft_putstr(res);
-
+	free(res);
+	free(to_free);
 }
 
 void type_d(va_list *list, t_flags **mody)
 {
 	long long int a;
-
+	char *num;
+	int res_len;
+	char *res;
+	char *to_free;
 	if ((*mody)->width_len < 0)
 	{
 		(*mody)->width_len *= -1;
 		(*mody)->flags[0] = 1;
 	}
-	if ((*mody)->type == 5)
-		a = (long long int)va_arg(*list, long long int);
-	else if ((*mody)->type == 1)
+	if ((*mody)->type == 1)
 		a = (char)va_arg(*list, long int);
 	else if ((*mody)->type == 2)
 		a = (short)va_arg(*list, long int);
@@ -351,15 +430,14 @@ void type_d(va_list *list, t_flags **mody)
 		a = (long long int)va_arg(*list, long long int);
 	else if ((*mody)->type == 4)
 		a = (long int)va_arg(*list, long int);
+	else if ((*mody)->type == 5)
+		a = (long long int)va_arg(*list, long long int);
 	else if ((*mody)->type == 6)
 		a = (size_t)va_arg(*list, size_t);
 	else
 		a = (int)va_arg(*list, int);
-	char *num;
-	int res_len;
-	char *res;
 	num = ft_itoa_base(a, 10);
-
+	to_free = num;
 	if ((*mody)->flags[1] == 0 && (*mody)->flags[2] == 1 && num[0] != '-')
 	{
 		ft_putchar(' ');
@@ -386,7 +464,6 @@ void type_d(va_list *list, t_flags **mody)
 		if ((*mody)->flags[1] != 1)
 			(*mody)->precision_len++;
 	}
-
 	if (res_len < (int)ft_strlen(num))
 	{
 		res_len = ft_strlen(num);
@@ -411,22 +488,24 @@ void type_d(va_list *list, t_flags **mody)
 	if ((*mody)->precision_len > 0)
 		write_precison(&res, (*mody)->precision_len, ft_strlen(num), (*mody)->flags[0]);
 	ft_putstr(res);
-
+	free(res);
+	free(to_free);
 }
 
 void type_D(va_list *list, t_flags **mody)
 {
 	long long int a;
 
-	if ((*mody)->type == 5)
-		a = (unsigned long int)va_arg(*list, unsigned long int);
-	else if ((*mody)->type == 1)
+	
+	if ((*mody)->type == 1)
 		a = (unsigned short)va_arg(*list, unsigned long int);
 	else if ((*mody)->type == 2)
 		a = (unsigned short)va_arg(*list, unsigned long int);
 	else if ((*mody)->type == 3)
 		a = (unsigned long int)va_arg(*list, unsigned long int);
 	else if ((*mody)->type == 4)
+		a = (unsigned long int)va_arg(*list, unsigned long int);
+	else if ((*mody)->type == 5)
 		a = (unsigned long int)va_arg(*list, unsigned long int);
 	else if ((*mody)->type == 6)
 		a = (size_t)va_arg(*list, size_t);
@@ -435,8 +514,9 @@ void type_D(va_list *list, t_flags **mody)
 	char *num;
 	int res_len;
 	char *res;
+	char *to_free;
 	num = ft_itoa_base(a, 10);
-
+	to_free = num;
 	if ((*mody)->flags[1] == 0 && (*mody)->flags[2] == 1 && num[0] != '-')
 	{
 		ft_putchar(' ');
@@ -444,7 +524,6 @@ void type_D(va_list *list, t_flags **mody)
 		(*mody)->width_len--;
 		(*mody)->flags[2]= 0;
 	}
-
 	if (num[0] == '0' && num[1] == '\0' && (*mody)->spec_flag == 0)
 		num++;
 	if (num[0] == '-')
@@ -487,24 +566,15 @@ void type_D(va_list *list, t_flags **mody)
 	if ((*mody)->precision_len > 0)
 		write_precison(&res, (*mody)->precision_len, ft_strlen(num), (*mody)->flags[0]);
 	ft_putstr(res);
-
+	free(res);
+	free(to_free);
 }
-
-
 
 void type_i(va_list *list, t_flags **mody)
 {
 	long long int a;
 
-		
-	// if ((*mody)->width_star)
-	// 	(*mody)->width_len = va_arg(*list, int);
-	// if ((*mody)->precision_star)
-	// 	(*mody)->precision_len = va_arg(*list, int);
-
-	if ((*mody)->type == 5)
-		a = (long long int)va_arg(*list, long long int);
-	else if ((*mody)->type == 1)
+	if ((*mody)->type == 1)
 		a = (char)va_arg(*list, long int);
 	else if ((*mody)->type == 2)
 		a = (short)va_arg(*list, long int);
@@ -512,6 +582,8 @@ void type_i(va_list *list, t_flags **mody)
 		a = (long long int)va_arg(*list, long long int);
 	else if ((*mody)->type == 4)
 		a = (long int)va_arg(*list, long int);
+	else if ((*mody)->type == 5)
+		a = (long long int)va_arg(*list, long long int);
 	else if ((*mody)->type == 6)
 		a = (size_t)va_arg(*list, size_t);
 	else
@@ -519,8 +591,9 @@ void type_i(va_list *list, t_flags **mody)
 	char *num;
 	int res_len;
 	char *res;
+	char *to_free;
 	num = ft_itoa_base(a, 10);
-
+	to_free = num;
 	if ((*mody)->flags[1] == 0 && (*mody)->flags[2] == 1 && num[0] != '-')
 	{
 		ft_putchar(' ');
@@ -528,7 +601,6 @@ void type_i(va_list *list, t_flags **mody)
 		(*mody)->width_len--;
 		(*mody)->flags[2]= 0;
 	}
-
 	if (num[0] == '0' && num[1] == '\0' && (*mody)->spec_flag == 0)
 		num++;
 	if (num[0] == '-')
@@ -571,20 +643,42 @@ void type_i(va_list *list, t_flags **mody)
 	if ((*mody)->precision_len > 0)
 		write_precison(&res, (*mody)->precision_len, ft_strlen(num), (*mody)->flags[0]);
 	ft_putstr(res);
+	free(res);
+	free(to_free);
+}
+
+void ft_realooctal(char **str, char c,char **to_free)
+{
+	char *tmp;
+	int i;
+	int j;
+
+	i = 0;
+	j = 0;
+	tmp = (char*)malloc(sizeof(char) * ft_strlen(*str));
+	while ((*str)[i])
+		tmp[j++] = (*str)[i++];
+	tmp[j] = 0;
+	free(*to_free);
+	(*str) = (char*)malloc(sizeof(char) * ft_strlen(tmp) + 2);
+	i = 1;
+	j = 0;
+	(*str)[0] = c;
+	while (tmp[j])
+		(*str)[i++] = tmp[j++];
+	(*str)[i] = 0;
+	free(tmp);
 }
 
 void type_o(va_list *list, t_flags **mody)
 {
 	long int a;
-	
-	// if ((*mody)->width_star)
-	// 	(*mody)->width_len = va_arg(*list, int);
-	// if ((*mody)->precision_star)
-	// 	(*mody)->precision_len = va_arg(*list, int);
+	char *num;
+	int res_len;
+	char *res;
+	char *to_free;
 
-	if ((*mody)->type == 5)
-		a = va_arg(*list, long int);
-	else if ((*mody)->type == 1)
+	if ((*mody)->type == 1)
 		a = (unsigned char)va_arg(*list, long int);
 	else if ((*mody)->type == 2)
 		a = (unsigned short)va_arg(*list, long int);
@@ -592,46 +686,36 @@ void type_o(va_list *list, t_flags **mody)
 		a = (unsigned long long)va_arg(*list, unsigned long long);
 	else if ((*mody)->type == 4)
 		a = (unsigned long)va_arg(*list, unsigned long);
+	else if ((*mody)->type == 5)
+		a = va_arg(*list, long int);
 	else if ((*mody)->type == 6)
 		a = (size_t)va_arg(*list, size_t);
 	else
 		a = (unsigned int)va_arg(*list, long int);
-	char *num;
-	int res_len;
-	char *res;
+	
 	num =  ft_itoa_base_u(a, 8, 'a');
+	to_free = num;
 
 	if ((*mody)->flags[1] == 1)
 		(*mody)->flags[1] = 0;
 
-	if (num[1] != '\0')
-	while (*num == '0')
-		num++;
 	if (num[0] == '0' && num[1] == '\0' && (*mody)->spec_flag == 0 && (*mody)->flags[3] != 1)
-	{
 		num++;
-	}
 	if ((*mody)->flags[3] == 1 && num[0] != '0')
 	{
-		num -= 1;
-		num[0] = '0';
+		ft_realooctal(&num, '0', & to_free);
+		to_free = num;
 	}
-	if (num[0] == '-') //если число негативное флаг space и + игнорируются
+	if (num[0] == '-')
 	{
 		(*mody)->flags[1] = 0;
 		(*mody)->flags[2] = 0;
 	}
-	if ((*mody)->flags[0] == 1) //если есть флаг - то флаг 0 игнорируестя
+	if ((*mody)->flags[0] == 1)
 		(*mody)->flags[4] = 0;
-	//если есть флаг 0 и указана точность, 0 игнорируется
 	if ((*mody)->flags[4] == 1 && ((*mody)->precision_star > 0 || (*mody)->precision_len > 0))
 		(*mody)->flags[4] = 0;
-
-
-	// if ((*mody)->precision_len > (*mody)->width_len) //ширина имеет приоритет только если точность меньше
-	// 	(*mody)->width_len = 0;
 	res_len = (*mody)->precision_len <= (*mody)->width_len ? (*mody)->width_len : (*mody)->precision_len;
-
 	if ((num[0] == '-' || (*mody)->flags[1] == 1) && (*mody)->precision_len >= (int)ft_strlen(num))
 	{
 		if ((*mody)->width_len <= (*mody)->precision_len)
@@ -645,40 +729,36 @@ void type_o(va_list *list, t_flags **mody)
 		if ((*mody)->flags[1] == 1)
 			res_len++;
 	}
-	
 	res = (char*)malloc(sizeof(char) * (res_len + 1));
 	res[res_len] = 0;
 	res_len--;
-
 	while (res_len != -1)
 		res[res_len--] = ' ';
-
 	(*mody)->precision_len -= ft_strlen(num);
 	(*mody)->width_len -= ft_strlen(num);
 	if ((*mody)->precision_len > 0 && (*mody)->width_len > 0 && (*mody)->width_len > (*mody)->precision_len)
 		(*mody)->width_len -= (*mody)->precision_len;
-
-
 	if ((*mody)->flags[4] == 1)
 		ft_write_zeros(&res,(*mody)->width_len, (*mody)->flags[1], a);
 	if ((*mody)->flags[4] == 0)
 		ft_write_spaces(&res,(*mody)->width_len, (*mody)->flags[0]);
-
 	ft_write_num(&res, num, (*mody)->flags[0], (*mody)->flags[1]);
-	
-
 	if ((*mody)->precision_len > 0)
 		write_precison(&res, (*mody)->precision_len, ft_strlen(num), (*mody)->flags[0]);
 	ft_putstr(res);
+	free(res);
+	free(to_free);
 }
 
 void type_O(va_list *list, t_flags **mody)
 {
 	unsigned long int a;
+	char *num;
+	int res_len;
+	char *res;
+	char *to_free;
 
-	if ((*mody)->type == 5)
-		a = va_arg(*list, unsigned long int);
-	else if ((*mody)->type == 1)
+	if ((*mody)->type == 1)
 		a = (unsigned short)va_arg(*list, unsigned long int);
 	else if ((*mody)->type == 2)
 		a = (unsigned short)va_arg(*list, unsigned long int);
@@ -686,46 +766,36 @@ void type_O(va_list *list, t_flags **mody)
 		a = (unsigned long long)va_arg(*list, unsigned long long);
 	else if ((*mody)->type == 4)
 		a = (unsigned long)va_arg(*list, unsigned long);
+	else if ((*mody)->type == 5)
+		a = va_arg(*list, unsigned long int);
 	else if ((*mody)->type == 6)
 		a = (size_t)va_arg(*list, size_t);
 	else
 		a = (unsigned long int)va_arg(*list, unsigned long int);
-	char *num;
-	int res_len;
-	char *res;
 	num =  ft_itoa_base_u(a, 8, 'a');
-
+	to_free = num;
 	if ((*mody)->flags[1] == 1)
 		(*mody)->flags[1] = 0;
-
 	if (num[1] != '\0')
 	while (*num == '0')
 		num++;
 	if (num[0] == '0' && num[1] == '\0' && (*mody)->spec_flag == 0 && (*mody)->flags[3] != 1)
-	{
 		num++;
-	}
 	if ((*mody)->flags[3] == 1 && num[0] != '0')
 	{
-		num -= 1;
-		num[0] = '0';
-		//num[1] = 'x';
+		ft_realooctal(&num, '0', & to_free);
+		to_free = num;
 	}
-	if (num[0] == '-') //если число негативное флаг space и + игнорируются
+	if (num[0] == '-')
 	{
 		(*mody)->flags[1] = 0;
 		(*mody)->flags[2] = 0;
 	}
-	if ((*mody)->flags[0] == 1) //если есть флаг - то флаг 0 игнорируестя
+	if ((*mody)->flags[0] == 1)
 		(*mody)->flags[4] = 0;
-	//если есть флаг 0 и указана точность, 0 игнорируется
 	if ((*mody)->flags[4] == 1 && ((*mody)->precision_star > 0 || (*mody)->precision_len > 0))
 		(*mody)->flags[4] = 0;
-
-	// if ((*mody)->precision_len > (*mody)->width_len) //ширина имеет приоритет только если точность меньше
-	// 	(*mody)->width_len = 0;
 	res_len = (*mody)->precision_len <= (*mody)->width_len ? (*mody)->width_len : (*mody)->precision_len;
-
 	if ((num[0] == '-' || (*mody)->flags[1] == 1) && (*mody)->precision_len >= (int)ft_strlen(num))
 	{
 		if ((*mody)->width_len <= (*mody)->precision_len)
@@ -739,47 +809,37 @@ void type_O(va_list *list, t_flags **mody)
 		if ((*mody)->flags[1] == 1)
 			res_len++;
 	}
-	
 	res = (char*)malloc(sizeof(char) * (res_len + 1));
 	res[res_len] = 0;
 	res_len--;
-
 	while (res_len != -1)
 		res[res_len--] = ' ';
-
 	(*mody)->precision_len -= ft_strlen(num);
 	(*mody)->width_len -= ft_strlen(num);
 	if ((*mody)->precision_len > 0 && (*mody)->width_len > 0 && (*mody)->width_len > (*mody)->precision_len)
 		(*mody)->width_len -= (*mody)->precision_len;
-
-
 	if ((*mody)->flags[4] == 1)
 		ft_write_zeros(&res,(*mody)->width_len, (*mody)->flags[1], a);
 	if ((*mody)->flags[4] == 0)
 		ft_write_spaces(&res,(*mody)->width_len, (*mody)->flags[0]);
-
 	ft_write_num(&res, num, (*mody)->flags[0], (*mody)->flags[1]);
-	
-
 	if ((*mody)->precision_len > 0)
 		write_precison(&res, (*mody)->precision_len, ft_strlen(num), (*mody)->flags[0]);
 	ft_putstr(res);
+	free(res);
+	free(to_free);
 }
 
 
 void type_u(va_list *list, t_flags **mody)
 {
 	unsigned long long int a;
+	char *num;
+	int res_len;
+	char *res;
+	char *to_free;
 
-		
-	// if ((*mody)->width_star)
-	// 	(*mody)->width_len = va_arg(*list, int);
-	// if ((*mody)->precision_star)
-	// 	(*mody)->precision_len = va_arg(*list, int);
-
-	if ((*mody)->type == 5)
-		a = (unsigned long long int)va_arg(*list, unsigned long long int);
-	else if ((*mody)->type == 1)
+	if ((*mody)->type == 1)
 		a = (unsigned char)va_arg(*list, unsigned long long int);
 	else if ((*mody)->type == 2)
 		a = (unsigned short)va_arg(*list, unsigned long long int);
@@ -787,16 +847,14 @@ void type_u(va_list *list, t_flags **mody)
 		a = (unsigned long long int)va_arg(*list, unsigned long long int);
 	else if ((*mody)->type == 4)
 		a = (unsigned long int)va_arg(*list, unsigned long long int);
+	else if ((*mody)->type == 5)
+		a = (unsigned long long int)va_arg(*list, unsigned long long int);
 	else if ((*mody)->type == 6)
 		a = (size_t)va_arg(*list, unsigned long long int);
 	else
 		a = (unsigned int)va_arg(*list, unsigned int);
-
-	char *num;
-	int res_len;
-	char *res;
-
 	num = ft_itoa_base_u(a, 10, 'a');
+	to_free = num;
 	(*mody)->flags[1] = 0;
 	if (num[0] == '0' && num[1] == '\0' && (*mody)->spec_flag == 0)
 		num++;
@@ -838,21 +896,19 @@ void type_u(va_list *list, t_flags **mody)
 	if ((*mody)->precision_len > 0)
 		write_precison(&res, (*mody)->precision_len, ft_strlen(num), (*mody)->flags[0]);
 	ft_putstr(res);
+	free(to_free);
+	free(res);
 }
 
 void type_U(va_list *list, t_flags **mody)
 {
 	unsigned long long int a;
+	char *num;
+	int res_len;
+	char *res;
+	char *to_free;
 
-		
-	// if ((*mody)->width_star)
-	// 	(*mody)->width_len = va_arg(*list, int);
-	// if ((*mody)->precision_star)
-	// 	(*mody)->precision_len = va_arg(*list, int);
-
-	if ((*mody)->type == 5)
-		a = (unsigned long long int)va_arg(*list, unsigned long long int);
-	else if ((*mody)->type == 1)
+	if ((*mody)->type == 1)
 		a = (unsigned short)va_arg(*list, unsigned long long int);
 	else if ((*mody)->type == 2)
 		a = (unsigned long)va_arg(*list, unsigned long long int);
@@ -860,16 +916,14 @@ void type_U(va_list *list, t_flags **mody)
 		a = (unsigned long long int)va_arg(*list, unsigned long long int);
 	else if ((*mody)->type == 4)
 		a = (unsigned long int)va_arg(*list, unsigned long long int);
+	else if ((*mody)->type == 5)
+		a = (unsigned long long int)va_arg(*list, unsigned long long int);
 	else if ((*mody)->type == 6)
 		a = (size_t)va_arg(*list, unsigned long long int);
 	else
 		a = (unsigned long)va_arg(*list, unsigned long);
-
-	char *num;
-	int res_len;
-	char *res;
-
 	num = ft_itoa_base_u(a, 10, 'a');
+	to_free = num;
 	(*mody)->flags[1] = 0;
 	if (num[0] == '0' && num[1] == '\0' && (*mody)->spec_flag == 0)
 		num++;
@@ -879,7 +933,6 @@ void type_U(va_list *list, t_flags **mody)
 		(*mody)->flags[4] = 0;
 	if ((*mody)->flags[4] == 1 && ((*mody)->precision_star > 0 || (*mody)->precision_len > 0))
 		(*mody)->flags[4] = 0;
-
 	res_len = (*mody)->precision_len <= (*mody)->width_len ? (*mody)->width_len : (*mody)->precision_len;
 	if ((num[0] == '-' || (*mody)->flags[1] == 1) && (*mody)->precision_len >= (int)ft_strlen(num))
 	{
@@ -911,19 +964,20 @@ void type_U(va_list *list, t_flags **mody)
 	if ((*mody)->precision_len > 0)
 		write_precison(&res, (*mody)->precision_len, ft_strlen(num), (*mody)->flags[0]);
 	ft_putstr(res);
+	free(res);
+	free(to_free);
 }
+
 
 void type_x(va_list *list, t_flags **mody)
 {
-long int a;
+	long int a;
 	char *num;
 	int res_len;
 	char *res;
+	char *to_free;
 		
-
-	if ((*mody)->type == 5)
-		a = va_arg(*list, long int);
-	else if ((*mody)->type == 1)
+	if ((*mody)->type == 1)
 		a = (unsigned char)va_arg(*list, long int);
 	else if ((*mody)->type == 2)
 		a = (unsigned short)va_arg(*list, long int);
@@ -931,34 +985,31 @@ long int a;
 		a = (unsigned long long)va_arg(*list, unsigned long long);
 	else if ((*mody)->type == 4)
 		a = (unsigned long)va_arg(*list, unsigned long);
+	else if ((*mody)->type == 5)
+		a = va_arg(*list, long int);
 	else if ((*mody)->type == 6)
 		a = (size_t)va_arg(*list, size_t);
 	else
 		a = (unsigned int)va_arg(*list, long int);
 	num =  ft_itoa_base_u(a, 16, 'a');
+	to_free = num;
 	if (num[0] == '0' && num[1] == '\0' && (*mody)->spec_flag == 0)
 		num++;
 	if ((*mody)->flags[1] == 1)
 		(*mody)->flags[1] = 0;
 
-	if (num[1] != '\0')
-	while (*num == '0')
-		num++;
-
 	if ((*mody)->flags[3] == 1 && a != 0)
 	{
-		num -= 2;
-		num[0] = '0';
-		num[1] = 'x';
+		ft_realochex(&num, 'x', &to_free);
 		(*mody)->precision_len += 2;
+		to_free = num;
 	}
-
-	if (num[0] == '-') //если число негативное флаг space и + игнорируются
+	if (num[0] == '-')
 	{
 		(*mody)->flags[1] = 0;
 		(*mody)->flags[2] = 0;
 	}
-	if ((*mody)->flags[0] == 1) //если есть флаг - то флаг 0 игнорируестя
+	if ((*mody)->flags[0] == 1)
 		(*mody)->flags[4] = 0;
 	if ((*mody)->flags[4] == 1 && ((*mody)->precision_len > 2))
 		(*mody)->flags[4] = 0;
@@ -985,9 +1036,6 @@ long int a;
 	(*mody)->width_len -= ft_strlen(num);
 	if ((*mody)->precision_len > 0 && (*mody)->width_len > 0 && (*mody)->width_len > (*mody)->precision_len)
 		(*mody)->width_len -= (*mody)->precision_len;
-
-	//printf("%d\n", (*mody)->width_len);
-
 	if ((*mody)->flags[4] == 1)
 		ft_write_zeros(&res,(*mody)->width_len, (*mody)->flags[1], a);
 	if ((*mody)->flags[4] == 0)
@@ -999,6 +1047,8 @@ long int a;
 	if ((*mody)->flags[3] == 1 && ((*mody)->flags[4] == 1 || (*mody)->precision_len > 0))
 		ft_make_0x_p(&res, 'x');
 	ft_putstr(res);
+	free(to_free);
+	free(res);
 }
 
 void type_X(va_list *list, t_flags **mody)
@@ -1007,10 +1057,9 @@ void type_X(va_list *list, t_flags **mody)
 	char *num;
 	int res_len;
 	char *res;
-
-	if ((*mody)->type == 5)
-		a = va_arg(*list, long int);
-	else if ((*mody)->type == 1)
+	char *to_free;
+	
+	if ((*mody)->type == 1)
 		a = (unsigned char)va_arg(*list, long int);
 	else if ((*mody)->type == 2)
 		a = (unsigned short)va_arg(*list, long int);
@@ -1018,34 +1067,31 @@ void type_X(va_list *list, t_flags **mody)
 		a = (unsigned long long)va_arg(*list, unsigned long long);
 	else if ((*mody)->type == 4)
 		a = (unsigned long)va_arg(*list, unsigned long);
+	else if ((*mody)->type == 5)
+		a = va_arg(*list, long int);
 	else if ((*mody)->type == 6)
 		a = (size_t)va_arg(*list, size_t);
 	else
 		a = (unsigned int)va_arg(*list, long int);
 	num =  ft_itoa_base_u(a, 16, 'A');
+	to_free = num;
 	if (num[0] == '0' && num[1] == '\0' && (*mody)->spec_flag == 0)
 		num++;
 	if ((*mody)->flags[1] == 1)
 		(*mody)->flags[1] = 0;
-
-	if (num[1] != '\0')
-	while (*num == '0')
-		num++;
-
 	if ((*mody)->flags[3] == 1 && num[1] != '\0')
 	{
-		num -= 2;
-		num[0] = '0';
-		num[1] = 'X';
+		ft_realochex(&num, 'X', &to_free);
+		(*mody)->precision_len += 2;
+		to_free = num;
 		(*mody)->precision_len += 2;
 	}
-
-	if (num[0] == '-') //если число негативное флаг space и + игнорируются
+	if (num[0] == '-')
 	{
 		(*mody)->flags[1] = 0;
 		(*mody)->flags[2] = 0;
 	}
-	if ((*mody)->flags[0] == 1) //если есть флаг - то флаг 0 игнорируестя
+	if ((*mody)->flags[0] == 1)
 		(*mody)->flags[4] = 0;
 	if ((*mody)->flags[4] == 1 && ((*mody)->precision_len > 2))
 		(*mody)->flags[4] = 0;
@@ -1081,8 +1127,9 @@ void type_X(va_list *list, t_flags **mody)
 		write_precison(&res, (*mody)->precision_len, ft_strlen(num), (*mody)->flags[0]);
 	if ((*mody)->flags[3] == 1 && ((*mody)->flags[4] == 1 || (*mody)->precision_len > 0))
 		ft_make_0x_p(&res, 'X');
-
 	ft_putstr(res);
+	free(to_free);
+	free(res);
 }
 
 void type_c(va_list *list, t_flags **mody)
@@ -1122,33 +1169,33 @@ void type_c(va_list *list, t_flags **mody)
 	ft_putchar(c);
 }
 
-
-
 void type_C(va_list *list, t_flags **mody)
 {
 
-	type_c(list, &(*mody));
-	// wchar_t c;
+	//type_c(list, &(*mody));
 
-	// *mody = *mody;
-	// c = va_arg(*list, wchar_t);
-	// // if ((*mody)->width_star)
-	// // 	(*mody)->width_len = va_arg(*list, int);
-	// // if ((*mody)->width_len > 0 && (*mody)->flags[0] == 1)
-	// // {
-	// // 	ft_putwchar(c);
-	// // 	while (--(*mody)->width_len)
-	// // 		ft_putwchar(' ');
-	// // 	return ;
-	// // }
-	// // if ((*mody)->width_len > 0 & (*mody)->flags[0] != 1)
-	// // {
-	// // 	while (--(*mody)->width_len)
-	// // 		ft_putwchar(' ');
-	// // 	ft_putwchar(c);
-	// // 	return ;
-	// // }
-	// ft_putwchar(c);
+	wchar_t c;
+
+	*mody = *mody;
+	c = va_arg(*list, wchar_t);
+	// if ((*mody)->width_star)
+	// 	(*mody)->width_len = va_arg(*list, int);
+	// if ((*mody)->width_len > 0 && (*mody)->flags[0] == 1)
+	// {
+	// 	ft_putwchar(c);
+	// 	while (--(*mody)->width_len)
+	// 		ft_putwchar(' ');
+	// 	return ;
+	// }
+	// if ((*mody)->width_len > 0 & (*mody)->flags[0] != 1)
+	// {
+	// 	while (--(*mody)->width_len)
+	// 		ft_putwchar(' ');
+	// 	ft_putwchar(c);
+	// 	return ;
+	// }
+	ft_putwchar(c);
+	//free(*mody);
 }
 
 void type_error(char *tmp, t_flags **mody)
@@ -1163,21 +1210,15 @@ void type_error(char *tmp, t_flags **mody)
 	}
 	if ((*mody)->flags[1] == 1)
 		(*mody)->flags[1] = 0;
-
-	if ((*mody)->flags[0] == 1) //если есть флаг - то флаг 0 игнорируестя
+	if ((*mody)->flags[0] == 1)
 		(*mody)->flags[4] = 0;
-	//если есть флаг 0 и указана точность, 0 игнорируется
 	if ((*mody)->flags[4] == 1 && ((*mody)->precision_star > 0 || (*mody)->precision_len > 0))
 		(*mody)->flags[4] = 0;
 	if (tmp[0] == '\0')
 		(*mody)->precision_len = 0;
-	// if ((*mody)->precision_len > (*mody)->width_len) //ширина имеет приоритет только если точность меньше
-	// 	(*mody)->width_len = 0;
 	res_len = (*mody)->precision_len <= (*mody)->width_len ? (*mody)->width_len : (*mody)->precision_len;
 	if ((*mody)->precision_len >= 0 && (*mody)->precision_len < (int)ft_strlen(tmp))
-	{
-			write_precison_str(&tmp, &(*mody), (int)ft_strlen(tmp));
-	}
+		write_precison_str(&tmp, &(*mody), (int)ft_strlen(tmp));
 	if ((tmp[0] == '-' || (*mody)->flags[1] == 1) && (*mody)->precision_len >= (int)ft_strlen(tmp))
 	{
 		if ((*mody)->width_len <= (*mody)->precision_len)
@@ -1191,7 +1232,6 @@ void type_error(char *tmp, t_flags **mody)
 		if ((*mody)->flags[1] == 1)
 			res_len++;
 	}
-
 	res = (char*)malloc(sizeof(char) * (res_len + 1));
 	res[res_len] = 0;
 	res_len--;
@@ -1204,12 +1244,46 @@ void type_error(char *tmp, t_flags **mody)
 		ft_write_zeros(&res,(*mody)->width_len, (*mody)->flags[0], 0);
 	ft_write_num(&res, tmp, (*mody)->flags[0], (*mody)->flags[1]);
 
-	ft_putstr(res);
+	g_str = ft_strjoin(g_str, res);
+	//printf(">%s<\n", g_str);
+	//ft_putstr(g_str);
+	free(tmp);
+	//free(res);
+	ft_putgstr();
+
+	
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				//HELP FUNCS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+char	*ft_strjoin(char *s1, char *s2)
+{
+	char			*res;
+	unsigned int	i;
+	unsigned int	j;
+
+	if (s1 == NULL || s2 == NULL)
+		return (NULL);
+	res = (char*)malloc(sizeof(char) * (ft_strlen(s1) + ft_strlen(s2)) + 1);
+	if (res == NULL)
+		return (NULL);
+	i = 0;
+	j = 0;
+	while (i < ft_strlen(s1))
+	{
+		res[i] = s1[i];
+		i++;
+	}
+	while (j < ft_strlen(s2))
+		res[i++] = s2[j++];
+	res[i] = '\0';
+	free(s1);
+	free(s2);
+	return (res);
+}
+
 
 char	*ft_strsub(char const *s, unsigned int start, size_t len)
 {
@@ -1238,6 +1312,7 @@ char	*ft_strdup(const char *s1)
 {
 	char	*res;
 	int		i;
+	int 	j;
 
 	if (s1 == 0)
 		return (0);
@@ -1245,10 +1320,10 @@ char	*ft_strdup(const char *s1)
 	res = (char*)malloc(sizeof(char) * ft_strlen(s1) + 1);
 	if (res == NULL)
 		return (NULL);
-	while (*s1 != 0)
+	j = 0;
+	while (s1[j] != 0)
 	{
-		res[++i] = *s1;
-		s1++;
+		res[++i] = s1[j++];
 	}
 	res[++i] = 0;
 	return (res);
@@ -1328,6 +1403,7 @@ void	ft_make_0x_p(char **str, char c)
 		(*str)[i++] = '0';
 	while (tmp[j])
 		(*str)[i++] = tmp[j++];
+	free(tmp);
 }
 
 void	ft_make_0x(char **str, char c)
@@ -1531,6 +1607,7 @@ void	ft_putwchar(wchar_t c)
 
 		ft_putchar((c & 63) + 128);			//теперь приняем маску 63 к последним битам в нашей очереди и добавляет верхушку (10xx-xxxx)
 	}
+
 }
 
 void	ft_putwstr(wchar_t const *str)
@@ -1544,19 +1621,43 @@ void	ft_putwstr(wchar_t const *str)
 	}
 }
 
-void	remove_zeros(char **str, int neg)
+// int main(int argc, char const *argv[])
+// {
+// 	ft_printf("%jx", -4294967296);
+// 	return 0;
+// }
+
+char	*remove_zeros(char **str, int neg)
 {
+	char *new;
+	int i;
+	int j;
+
+	i = 0;
+	j = 0;
+	new = (char*)malloc(sizeof(char) * 25);
 	if(*str)
 	{
 		if (neg == 1)
 		{
-			while (*(*str + 1) == '0')
-			(*str)++;
-		return ;
+			new[i++] = ' ';
+			j++;
+			while ((*str)[j] == '0')
+				j++;
+			while((*str)[j])
+				new[i++] = (*str)[j++];
+			new[i] = 0;
+		free(*str);
+		return (new);
 		}
-		while (**str == '0')
-			(*str)++;
+		while ((*str)[j] == '0')
+			j++;
+		while((*str)[j])
+			new[i++] = (*str)[j++];
+		new[i] = 0;
 	}
+	free(*str);
+	return (new);
 }
 
 char	*ft_itoa_base(long long int value, int base)
@@ -1590,7 +1691,7 @@ char	*ft_itoa_base(long long int value, int base)
 		nbr[i + neg] = (r % base) + (r % base > 9 ? 'a' - 10 : '0');
 		r = r / base;
 	}
-	remove_zeros(&nbr, neg);
+	nbr = remove_zeros(&nbr, neg);
 	if (neg)
 		nbr[0] = '-';
 	return (nbr);
@@ -1615,7 +1716,7 @@ char	*ft_itoa_base_u(unsigned long int value, int base, char later)
 		nbr[i] = (value % base) + (value % base > 9 ? later - 10 : '0');
 		value = value / base;
 	}
-	remove_zeros(&nbr, 0);
+	nbr = remove_zeros(&nbr, 0);
 	return (nbr);
 }
 
@@ -1702,10 +1803,34 @@ wchar_t 	*ft_duplic_wchr(wchar_t *str)
 //////////////////////////////////////////////////////////////////////////////////////
 				//READ FORMATING//
 //////////////////////////////////////////////////////////////////////////////////////
-int		iis(char c)
+
+// int main()
+// {
+// 	printf(">%010-+.3 5 .2d<\n", 14);
+// 	return 0;
+// }
+void	check_flags(char c, t_flags **formatt)
+{
+	if (c == '-')
+		(*formatt)->flags[0] = 1;
+	if (c == '+')
+		(*formatt)->flags[1] = 1;
+	if (c == ' ')
+		(*formatt)->flags[2] = 1;
+	if (c == '#')
+		(*formatt)->flags[3] = 1;
+	if (c == '0')
+		(*formatt)->flags[4] = 1;
+}
+
+
+int		iis(char c, t_flags **formatt)
 {
 	if (c == ' ' || c == '#' || c == '-' || c == '+')
+	{
+		check_flags(c,  &(*formatt));
 		return (1);
+	}
 	else
 		return (0);
 }
@@ -1724,54 +1849,17 @@ void	init_format(t_flags **formatt)
 	(*formatt)->precision_len = 0;
 	(*formatt)->type = 0;
 	(*formatt)->spec_flag = -1;
+	(*formatt)->error = 0;
 }
-
-void	check_flags(char c, t_flags **formatt)
-{
-	if (c == '-')
-		(*formatt)->flags[0] = 1;
-	if (c == '+')
-		(*formatt)->flags[1] = 1;
-	if (c == ' ')
-		(*formatt)->flags[2] = 1;
-	if (c == '#')
-		(*formatt)->flags[3] = 1;
-	if (c == '0')
-		(*formatt)->flags[4] = 1;
-}
-
 
 
 void	check_width(char **str, t_flags **formatt, va_list **list)
 {
 	int res;
 
-	// if (**str == '*')
-	// {
-	// 	(*formatt)->width_star = 1;
-	// 	(*str)++;
-	// 	while (**str && ((**str >= '0' && **str <= '9') || iis(**str)))
-	// 		(*str)++;
-	// }
-	// else
-	// {
-	// 	res = 0;
-	// 	{
-	// 		if (**str >= '0' && **str <= '9')
-	// 			res = (**str - 48) + (res * 10);
-	// 		(*str)++;
-	// 	}
-	// 	if (**str == '*')
-	// 	{
-	// 		(*formatt)->width_star = 1;
-	// 		(*str)++;
-	// 	}
-	// 	(*formatt)->width_len = res;
-	// }
 	res = 0;
-	while (**str && ((**str >= '0' && **str <= '9') || iis(**str) || **str == '*'))
+	while (**str && ((**str >= '0' && **str <= '9') || iis(**str, &(*formatt)) || **str == '*'))
 	{
-
 		if (**str >= '0' && **str <= '9')
 		{
 			if (*(*str - 1) == '*')
@@ -1793,17 +1881,7 @@ void	check_precision(char **str, t_flags **formatt, va_list **list)
 
 	(*str)++;
 	res = 0;
-	// if (**str == '*')
-	// {
-	// 	(*formatt)->precision_star = 1;
-	// 	(*str)++;
-	// 	while (**str && ((**str >= '0' && **str <= '9') || iis(**str)))
-	// 		(*str)++;
-	// }
-	// else
-	// {
-		//res = 0;
-		while (**str && ((**str >= '0' && **str <= '9') || iis(**str) || **str == '*'))
+		while (**str && ((**str >= '0' && **str <= '9') || iis(**str, &(*formatt)) || **str == '*'))
 		{
 			if (**str >= '0' && **str <= '9')
 			{
@@ -1842,16 +1920,9 @@ void	check_type(char **str, t_flags **formatt)
 	if ((*formatt)->type == 3 || (*formatt)->type == 1)
 		(*str)++;
 	(*str)++;
-	while (iis(**str))
+	while (iis(**str, &(*formatt)))
 		(*str)++;
 }
-
-// int main()
-// {
-// 	ft_printf("% hZ%");
-// 	//ft_printf("%05%");
-// 	return 0;
-// }
 
 t_flags		*ft_format(char **str, va_list *list)
 {
@@ -1869,7 +1940,7 @@ t_flags		*ft_format(char **str, va_list *list)
 		check_width(&(*str), &formatt, &list);
 	if (**str == '.')
 		check_precision(&(*str), &formatt, &list);
-	if (**str == 'h' || **str == 'l' || **str == 'j' || **str == 'z')
+	while (**str == 'h' || **str == 'l' || **str == 'j' || **str == 'z')
 		check_type(&(*str), &formatt);
 	while (*types)
 		if (*(*str) == *types++)
