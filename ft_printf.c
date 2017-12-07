@@ -287,7 +287,7 @@ void 	check_err_S(wchar_t *str)
 
 // int main(int argc, char const *argv[])
 // {
-// 	ft_printf("%S", L"asdas##@#@#@()()()()(das");
+// 	ft_printf("11%S", L"asdas##@#@#@()()()()(das");
 // 	return 0;
 // }
 
@@ -312,7 +312,8 @@ void type_S(va_list *list, t_flags **mody)
 		free(tmp);
 		return ;
 	}
-	ft_putgstr();
+	if (g_str[0] != 0)
+		ft_putgstr();
 	if ((*mody)->flags[4] == 1 && (*mody)->flags[0] != 1)
 		filler = '0';
 	if ((*mody)->precision_len == 0 && (*mody)->spec_flag == 0)
