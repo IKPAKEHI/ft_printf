@@ -108,6 +108,7 @@ void ft_putgstr(void)
 	free(g_str);
 	g_str = (char*)malloc(sizeof(char) * 32);
 	g_i = 0;
+	g_str[0] = 0;
 }
 
 int			ft_printf(char *format, ...)
@@ -311,7 +312,7 @@ void type_S(va_list *list, t_flags **mody)
 		free(tmp);
 		return ;
 	}
-	//ft_putgstr();
+	ft_putgstr();
 	if ((*mody)->flags[4] == 1 && (*mody)->flags[0] != 1)
 		filler = '0';
 	if ((*mody)->precision_len == 0 && (*mody)->spec_flag == 0)
@@ -1142,16 +1143,17 @@ void type_X(va_list *list, t_flags **mody)
 	free(res);
 }
 
-// int main(int argc, char const *argv[])
-// {
-// 	setlocale(LC_ALL, "en_US.UTF-8");
-// 	 ft_printf("%C", L'�');
-// 	// ft_printf("%S", L"@@");
+int main(int argc, char const *argv[])
+{
+	setlocale(LC_ALL, "en_US.UTF-8");
+	 //ft_printf("%c", L'�');
+	 ft_printf("%S", L"@@");
+
 
 	
-// 	//ft_printf("%S", L"aa");
-// 	return 0;
-// }
+	//ft_printf("%S", L"aa");
+	return 0;
+}
 
 void type_c(va_list *list, t_flags **mody)
 {
