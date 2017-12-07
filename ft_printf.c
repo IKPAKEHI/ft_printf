@@ -305,7 +305,7 @@ void type_S(va_list *list, t_flags **mody)
 		ft_putstr("(null)");
 		return ;
 	}
-	//check_err_S(tmp);
+	check_err_S(tmp);
 	if (g_err == 1)
 	{
 		free(tmp);
