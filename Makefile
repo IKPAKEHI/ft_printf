@@ -12,7 +12,7 @@
 
 NAME = libftprintf.a
 
-CC = gcc -O3
+CC = gcc -O3 -Wall -Wextra -Werror
 
 OBJ = aluxuary_funcs/check_err_su.o aluxuary_funcs/ft_duplic_wchr.o aluxuary_funcs/ft_itoa_base.o \
 	aluxuary_funcs/ft_itoa_base_u.o aluxuary_funcs/ft_make_0x_p.o aluxuary_funcs/ft_memmove.o aluxuary_funcs/ft_putstr.o \

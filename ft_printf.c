@@ -31,7 +31,7 @@ static void		ft_init_funcs(void)
 	g_f[10] = type_x;
 	g_f[11] = type_xu;
 	g_f[12] = type_c;
-	g_f[13] = type_cu;
+	g_f[13] = type_uuu;
 	g_f[14] = type_interest;
 	g_f[15] = 0;
 }
