@@ -16,4 +16,3 @@ void	type_cu(va_list *list, t_flags **mody)
 {
 	type_c(list, &(*mody));
 }
-
