@@ -12,7 +12,7 @@
 
 #include "../ft_printf.h"
 
-wchar_t 	*ft_duplic_wchr(wchar_t *str)
+wchar_t	*ft_duplic_wchr(wchar_t *str)
 {
 	int		i;
 	wchar_t	*res;
@@ -20,7 +20,8 @@ wchar_t 	*ft_duplic_wchr(wchar_t *str)
 	if (str == 0)
 		return (0);
 	i = 0;
-	res = (wchar_t*)malloc(sizeof(wchar_t) * ft_wstrlen(str) + sizeof(wchar_t));
+	if (!(res = (wchar_t*)malloc(sizeof(wchar_t) * ft_wstrlen(str) + 4)))
+		return (0);
 	while (*str)
 		res[i++] = *str++;
 	res[i] = 0;

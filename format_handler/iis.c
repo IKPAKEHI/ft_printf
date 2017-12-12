@@ -16,7 +16,7 @@ int		iis(char c, t_flags **formatt)
 {
 	if (c == ' ' || c == '#' || c == '-' || c == '+')
 	{
-		check_flags(c,  &(*formatt));
+		check_flags(c, &(*formatt));
 		return (1);
 	}
 	else

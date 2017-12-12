@@ -12,9 +12,9 @@
 
 NAME = libftprintf.a
 
-CC = gcc -O3
+CC = gcc -O3 -Wall -Wextra -Werror
 
-OBJ = aluxuary_funcs/check_err_S.o aluxuary_funcs/ft_duplic_wchr.o aluxuary_funcs/ft_itoa_base.o \
+OBJ = aluxuary_funcs/check_err_su.o aluxuary_funcs/ft_duplic_wchr.o aluxuary_funcs/ft_itoa_base.o \
 	aluxuary_funcs/ft_itoa_base_u.o aluxuary_funcs/ft_make_0x_p.o aluxuary_funcs/ft_memmove.o aluxuary_funcs/ft_putstr.o \
 	aluxuary_funcs/ft_putchar.o aluxuary_funcs/ft_putgstr.o aluxuary_funcs/ft_putgstr.o aluxuary_funcs/ft_putwchar.o \
 	aluxuary_funcs/ft_putwstr.o aluxuary_funcs/ft_realoc_str.o aluxuary_funcs/ft_realochex.o aluxuary_funcs/ft_realooctal.o \
@@ -24,9 +24,9 @@ OBJ = aluxuary_funcs/check_err_S.o aluxuary_funcs/ft_duplic_wchr.o aluxuary_func
 	aluxuary_funcs/write_precison_str.o \
 	format_handler/check_flags.o format_handler/check_precision.o format_handler/check_type.o format_handler/check_width.o \
 	format_handler/ft_format.o format_handler/iis.o format_handler/init_format.o \
-	type_handlers/type_error.o type_handlers/type_C.o type_handlers/type_cc.o type_handlers/type_D.o type_handlers/type_i.o \
-	type_handlers/type_interest.o type_handlers/type_O.o type_handlers/type_oo.o type_handlers/type_p.o type_handlers/type_S.o type_handlers/type_ss.o \
-	type_handlers/type_U.o type_handlers/type_uu.o type_handlers/type_X.o type_handlers/type_xx.o type_handlers/type_dd.o\
+	type_handlers/type_error.o type_handlers/type_cu.o type_handlers/type_cc.o type_handlers/type_du.o type_handlers/type_i.o \
+	type_handlers/type_interest.o type_handlers/type_ou.o type_handlers/type_oo.o type_handlers/type_p.o type_handlers/type_su.o type_handlers/type_ss.o \
+	type_handlers/type_uuu.o type_handlers/type_uu.o type_handlers/type_xu.o type_handlers/type_xx.o type_handlers/type_dd.o\
 	ft_printf.o
 
 all: $(NAME)

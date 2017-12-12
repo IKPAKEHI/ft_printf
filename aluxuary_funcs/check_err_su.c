@@ -12,14 +12,14 @@
 
 #include "../ft_printf.h"
 
-void 	check_err_S(wchar_t *str)
+void	check_err_su(wchar_t *str)
 {
 	int i;
 
 	i = 0;
-	while(str[i])
+	while (str[i])
 	{
-		if(str[i] > 2097152)
+		if (str[i] > 2097152)
 			g_err = 1;
 		i++;
 	}

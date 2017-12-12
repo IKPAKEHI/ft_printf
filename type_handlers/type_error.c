@@ -41,7 +41,7 @@ static void		in0(t_flags **m, char **tmp, int *r_l)
 	}
 }
 
-void		type_error(char *tmp, t_flags **mody)
+void			type_error(char *tmp, t_flags **mody)
 {
 	int		res_len;
 	char	*res;
@@ -52,18 +52,19 @@ void		type_error(char *tmp, t_flags **mody)
 		return ;
 	}
 	in0(&(*mody), &tmp, &res_len);
-	res = (char*)malloc(sizeof(char) * (res_len + 1));
-	res[res_len] = 0;
-	res_len--;
+	if (!(res = (char*)malloc(sizeof(char) * (res_len + 1))))
+		return ;
+	res[res_len--] = 0;
 	while (res_len != -1)
 		res[res_len--] = ' ';
 	(*mody)->width_len -= ft_strlen(tmp);
 	if ((*mody)->flags[4] == 0)
-		ft_write_spaces(&res,(*mody)->width_len, (*mody)->flags[0]);
+		ft_write_spaces(&res, (*mody)->width_len, (*mody)->flags[0]);
 	if ((*mody)->flags[4] == 1)
-		ft_write_zeros(&res,(*mody)->width_len, (*mody)->flags[0], 0);
+		ft_write_zeros(&res, (*mody)->width_len, (*mody)->flags[0], 0);
 	ft_write_num(&res, tmp, (*mody)->flags[0], (*mody)->flags[1]);
-	g_str = ft_strjoin(g_str, res);
+	if (!(g_str = ft_strjoin(g_str, res)))
+		return ;
 	free(tmp);
 	ft_putgstr();
 }

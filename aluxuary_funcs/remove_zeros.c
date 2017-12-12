@@ -26,7 +26,7 @@ char	*remove_zeros(char **str, int neg)
 		new[i++] = ' ';
 		while ((*str)[++j] == '0')
 			;
-		while((*str)[j])
+		while ((*str)[j])
 			new[i++] = (*str)[j++];
 		new[i] = 0;
 		free(*str);
@@ -34,7 +34,7 @@ char	*remove_zeros(char **str, int neg)
 	}
 	while ((*str)[j] == '0')
 		j++;
-	while((*str)[j])
+	while ((*str)[j])
 		new[i++] = (*str)[j++];
 	new[i] = 0;
 	free(*str);

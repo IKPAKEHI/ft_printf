@@ -16,7 +16,7 @@ char	*ft_strdup(const char *s1)
 {
 	char	*res;
 	int		i;
-	int 	j;
+	int		j;
 
 	if (s1 == 0)
 		return (0);

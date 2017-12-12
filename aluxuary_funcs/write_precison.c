@@ -31,7 +31,7 @@ static void		in1(int *j, char **str, int *n_l, int *i)
 	((*str)[0] == '+') ? ((*n_l) += 1) : 0;
 	ft_memmove((*str) + (*i), (*str) + a, (*n_l) - a);
 	(*i) -= a;
-	while((*i)--)
+	while ((*i)--)
 		(*str)[(*j)++] = '0';
 }
 

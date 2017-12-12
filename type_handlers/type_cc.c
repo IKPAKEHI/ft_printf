@@ -39,7 +39,7 @@ void	type_c(va_list *list, t_flags **mody)
 	in0(&(*mody), &filler);
 	if ((*mody)->type == 4)
 	{
-		type_C(list, &(*mody));
+		type_cu(list, &(*mody));
 		return ;
 	}
 	c = va_arg(*list, long long);

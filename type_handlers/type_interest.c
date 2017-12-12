@@ -19,8 +19,11 @@ void	type_interest(va_list *list, t_flags **mody)
 	char	filler;
 
 	filler = ' ';
+	if (list == 0)
+		return ;
 	res_len = (*mody)->width_len == 0 ? 1 : (*mody)->width_len;
-	res = (char*)malloc(sizeof(char) * res_len + 1);
+	if (!(res = (char*)malloc(sizeof(char) * res_len + 1)))
+		return ;
 	res[res_len] = 0;
 	if ((*mody)->flags[0] == 1)
 	{

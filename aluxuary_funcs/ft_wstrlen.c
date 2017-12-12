@@ -12,7 +12,7 @@
 
 #include "../ft_printf.h"
 
-int 	ft_wstrlen(wchar_t *str)
+int		ft_wstrlen(wchar_t *str)
 {
 	int i;
 	int res;
@@ -22,13 +22,13 @@ int 	ft_wstrlen(wchar_t *str)
 	while (str[i])
 	{
 		if (str[i] < 128)
-			res +=1;
+			res += 1;
 		if (str[i] > 127 && str[i] < 2048)
-			res +=2;
+			res += 2;
 		if (str[i] > 2047 && str[i] < 65536)
-			res +=3;
+			res += 3;
 		if (str[i] > 65535 && str[i] < 2097152)
-			res +=4;
+			res += 4;
 		i++;
 	}
 	return (res);

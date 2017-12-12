@@ -18,9 +18,7 @@ int		num_len(int n)
 
 	n = n < 0 ? n * -1 : n;
 	i = 1;
-
 	while ((n /= 10))
 		i++;
-	
 	return (i);
 }

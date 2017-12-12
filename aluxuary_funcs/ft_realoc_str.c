@@ -22,20 +22,12 @@ int		ft_realoc_str(char **str, int len)
 	i = 0;
 	if ((*str) == 0 || str == 0)
 		return (0);
-	if (!(tmp = (char*)malloc(sizeof(char) * (ft_strlen(*str) + 1))))
+	if (!(tmp = (char*)malloc(sizeof(char) * (ft_strlen(*str) + len + 1))))
 		return (0);
 	while ((*str)[j])
 		tmp[i++] = (*str)[j++];
 	tmp[i] = 0;
 	free((*str));
-	if (!(*str = (char*)malloc(sizeof(char) *
-		(ft_strlen(tmp) + len + 1))))
-		return (0);
-	i = 0;
-	j = 0;
-	while (tmp[j])
-		(*str)[i++] = tmp[j++];
-	(*str)[i] = 0;
-	free(tmp);
+	(*str) = tmp;
 	return (1);
 }

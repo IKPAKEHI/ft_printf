@@ -13,7 +13,7 @@
 #include "../ft_printf.h"
 
 void	ft_putwchar(wchar_t c)
-{			
+{
 	if (c < 128)
 		ft_putchar(c);
 	if (c > 127 && c < 2048)
@@ -31,7 +31,7 @@ void	ft_putwchar(wchar_t c)
 	{
 		ft_putchar((c >> 18) + 240);
 		ft_putchar(((c >> 12) & 63) + 128);
-		ft_putchar(((c >> 6) & 63) + 128);  
+		ft_putchar(((c >> 6) & 63) + 128);
 		ft_putchar((c & 63) + 128);
 	}
 }

@@ -17,7 +17,8 @@ void	check_width(const char **str, t_flags **formatt, va_list **list)
 	int res;
 
 	res = 0;
-	while (**str && ((**str >= '0' && **str <= '9') || iis(**str, &(*formatt)) || **str == '*'))
+	while (**str && ((**str >= '0' && **str <= '9') ||
+	iis(**str, &(*formatt)) || **str == '*'))
 	{
 		if (**str >= '0' && **str <= '9')
 		{
@@ -29,5 +30,5 @@ void	check_width(const char **str, t_flags **formatt, va_list **list)
 			res = va_arg(**list, int);
 		(*str)++;
 	}
-		(*formatt)->width_len = res;
+	(*formatt)->width_len = res;
 }

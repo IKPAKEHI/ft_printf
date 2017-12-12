@@ -22,17 +22,20 @@ static void		in0(char **tmp, const char **str, t_flags **formatt)
 	if (*(*tmp))
 		(*tmp)++;
 	while (*(*tmp) && *(*tmp) != '%')
-		ft_putchar(*(*tmp)++);	
+		ft_putchar(*(*tmp)++);
 }
 
-t_flags		*ft_format(const char **str, va_list *list)
+t_flags			*ft_format(const char **str, va_list *list)
 {
 	t_flags	*formatt;
 	char	*tmp;
-	char	*types = "sSpdDioOuUxXcC% ";
+	char	*types;
 
+	types = "sSpdDioOuUxXcC% ";
 	tmp = (char*)(*str) - 1;
 	init_format(&formatt);
+	if (!formatt)
+		return (0);
 	while (**str && (**str == '-' || **str == '+' || **str == ' ' ||
 	**str == '#' || **str == '0'))
 		check_flags(*(*str)++, &formatt);

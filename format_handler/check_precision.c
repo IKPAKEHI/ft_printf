@@ -18,7 +18,8 @@ void	check_precision(const char **str, t_flags **formatt, va_list **list)
 
 	(*str)++;
 	res = 0;
-	while (**str && ((**str >= '0' && **str <= '9') || iis(**str, &(*formatt)) || **str == '*' || **str == '.'))
+	while (**str && ((**str >= '0' && **str <= '9') ||
+	iis(**str, &(*formatt)) || **str == '*' || **str == '.'))
 	{
 		if (**str == '.')
 			res = 0;

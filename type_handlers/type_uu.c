@@ -12,7 +12,7 @@
 
 #include "../ft_printf.h"
 
-static void		i(t_flags **m, char **n, va_list *l, unsigned long long int *a)
+static int		i(t_flags **m, char **n, va_list *l, unsigned long long int *a)
 {
 	if ((*m)->type == 1)
 		(*a) = (unsigned char)va_arg(*l, unsigned long long int);
@@ -28,10 +28,12 @@ static void		i(t_flags **m, char **n, va_list *l, unsigned long long int *a)
 		(*a) = (size_t)va_arg(*l, unsigned long long int);
 	else
 		(*a) = (unsigned int)va_arg(*l, unsigned int);
-	(*n) = ft_itoa_base_u((*a), 10, 'a');
+	if (!((*n) = ft_itoa_base_u((*a), 10, 'a')))
+		return (0);
 	(*m)->flags[1] = 0;
 	if ((*m)->precision_len >= 0 && (*m)->spec_flag == 0)
 		(*m)->flags[4] = 0;
+	return (1);
 }
 
 static void		in1(t_flags **m, char **num, int *r_l)
@@ -60,12 +62,13 @@ static void		in1(t_flags **m, char **num, int *r_l)
 		(*r_l) = ft_strlen((*num));
 		if ((*m)->flags[1] == 1)
 			(*r_l)++;
-	}	
+	}
 }
 
-static void		in2(char **r, t_flags **mody, char **n, int *r_l)
+static int		in2(char **r, t_flags **mody, char **n, int *r_l)
 {
-	(*r) = (char*)malloc(sizeof(char) * ((*r_l) + 1));
+	if (!((*r) = (char*)malloc(sizeof(char) * ((*r_l) + 1))))
+		return (0);
 	(*r)[(*r_l)] = 0;
 	(*r_l)--;
 	while ((*r_l) != -1)
@@ -74,7 +77,8 @@ static void		in2(char **r, t_flags **mody, char **n, int *r_l)
 	(*mody)->width_len -= ft_strlen((*n));
 	if ((*mody)->precision_len > 0 && (*mody)->width_len > 0 &&
 	(*mody)->width_len > (*mody)->precision_len)
-		(*mody)->width_len -= (*mody)->precision_len;	
+		(*mody)->width_len -= (*mody)->precision_len;
+	return (1);
 }
 
 void			type_u(va_list *list, t_flags **mody)
@@ -85,14 +89,16 @@ void			type_u(va_list *list, t_flags **mody)
 	char					*res;
 	char					*to_free;
 
-	i(&(*mody), &num, list, &a);
+	if (!(i(&(*mody), &num, list, &a)))
+		return ;
 	to_free = num;
 	in1(&(*mody), &num, &res_len);
-	in2(&res, &(*mody), &num, &res_len);
+	if (!(in2(&res, &(*mody), &num, &res_len)))
+		return ;
 	if ((*mody)->flags[4] == 1)
-		ft_write_zeros(&res,(*mody)->width_len, (*mody)->flags[1], 1);
+		ft_write_zeros(&res, (*mody)->width_len, (*mody)->flags[1], 1);
 	if ((*mody)->flags[4] == 0)
-		ft_write_spaces(&res,(*mody)->width_len, (*mody)->flags[0]);
+		ft_write_spaces(&res, (*mody)->width_len, (*mody)->flags[0]);
 	ft_write_num(&res, num, (*mody)->flags[0], (*mody)->flags[1]);
 	if ((*mody)->precision_len > 0)
 		write_precison(&res, (*mody)->precision_len,

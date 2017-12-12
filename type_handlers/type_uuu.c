@@ -12,7 +12,7 @@
 
 #include "../ft_printf.h"
 
-static void		i(t_flags **m, char **n, va_list *l, unsigned long long int *a)
+static int		i(t_flags **m, char **n, va_list *l, unsigned long long int *a)
 {
 	if ((*m)->type == 1)
 		(*a) = (unsigned short)va_arg(*l, unsigned long long int);
@@ -28,10 +28,14 @@ static void		i(t_flags **m, char **n, va_list *l, unsigned long long int *a)
 		(*a) = (size_t)va_arg(*l, unsigned long long int);
 	else
 		(*a) = (unsigned long)va_arg(*l, unsigned long);
-	(*n) = ft_itoa_base_u((*a), 10, 'a');
+	if (!((*n) = ft_itoa_base_u((*a), 10, 'a')))
+		return (0);
 	if ((*m)->precision_len >= 0 && (*m)->spec_flag == 0)
-	(*m)->flags[4] = 0;
-	(*m)->flags[1] = 0;
+	{
+		(*m)->flags[4] = 0;
+		(*m)->flags[1] = 0;
+	}
+	return (1);
 }
 
 static void		in1(t_flags **mody, char **num, int *r_l)
@@ -74,7 +78,7 @@ static void		in2(t_flags **mody, char **num, char **res, int *r_l)
 		(*mody)->width_len -= (*mody)->precision_len;
 }
 
-void			type_U(va_list *list, t_flags **mody)
+void			type_uuu(va_list *list, t_flags **mody)
 {
 	unsigned long long int	a;
 	char					*num;
@@ -82,17 +86,18 @@ void			type_U(va_list *list, t_flags **mody)
 	char					*res;
 	char					*to_free;
 
-	i(&(*mody), &num, list, &a);
+	if (!list || !mody || !(*mody) || !(i(&(*mody), &num, list, &a)))
+		return ;
 	to_free = num;
 	in1(&(*mody), &num, &res_len);
-	res = (char*)malloc(sizeof(char) * (res_len + 1));
-	res[res_len] = 0;
-	res_len--;
+	if (!(res = (char*)malloc(sizeof(char) * (res_len + 1))))
+		return ;
+	res[res_len--] = 0;
 	in2(&(*mody), &num, &res, &res_len);
 	if ((*mody)->flags[4] == 1)
-		ft_write_zeros(&res,(*mody)->width_len, (*mody)->flags[1], 1);
+		ft_write_zeros(&res, (*mody)->width_len, (*mody)->flags[1], 1);
 	if ((*mody)->flags[4] == 0)
-		ft_write_spaces(&res,(*mody)->width_len, (*mody)->flags[0]);
+		ft_write_spaces(&res, (*mody)->width_len, (*mody)->flags[0]);
 	ft_write_num(&res, num, (*mody)->flags[0], (*mody)->flags[1]);
 	if ((*mody)->precision_len > 0)
 		write_precison(&res, (*mody)->precision_len,
@@ -101,4 +106,3 @@ void			type_U(va_list *list, t_flags **mody)
 	free(res);
 	free(to_free);
 }
-

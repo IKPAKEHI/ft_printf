@@ -12,7 +12,7 @@
 
 #include "../ft_printf.h"
 
-void ft_putgstr(void)
+void	ft_putgstr(void)
 {
 	ft_putstr(g_str);
 	free(g_str);
